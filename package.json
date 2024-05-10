@@ -1,0 +1,96 @@
+{
+  "name": "codeflowdiag",
+  "displayName": "CodeFlowDiag",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.88.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "codeflowdiag.myTreeView",
+          "name": "My Tree View",
+          "when": "extensionActivated"
+        }
+      ]
+    },
+    "webviews": [
+      {
+        "viewType": "markdown.preview"
+      }
+    ],
+    "commands": [
+      {
+        "command": "treeDataProvider.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "codeflowdiag.OpenTreeViewItem",
+        "category": "Custom",
+        "title": "Load flow diag",
+        "icon": "$(pencil)"
+      },
+      {
+        "command": "codeflowdiag.runIt",
+        "title": "CodeFlowDiag"
+      },
+      {
+        "command": "codeflowdiag.copySrcPathAction",
+        "title": "Copy source path (code flow diag)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "treeDataProvider.refresh",
+          "when": "view == codeflowdiag.myTreeView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "codeflowdiag.OpenTreeViewItem",
+          "when": "extensionActivated && view == codeflowdiag.myTreeView",
+          "group": "inline"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "codeflowdiag.copySrcPathAction",
+          "group": "navigation",
+          "when": "editorTextFocus && extensionActivated"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test",
+    "build": "webpack --config webpack.config.js --mode development"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.88.0",
+    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.57.0",
+    "typescript": "^5.3.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "generator-code": "^1.8.5",
+    "path": "^0.12.7",
+    "three": "^0.163.0"
+  }
+}
