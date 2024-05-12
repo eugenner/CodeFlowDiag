@@ -210,7 +210,7 @@ function activate(context) {
 		vscode.workspace.fs.readFile(uri).then(fileContent => {
 			const contentString = Buffer.from(fileContent).toString('utf-8');
 			const fileName = vscode.workspace.asRelativePath(item.pt);
-			panel.webview.postMessage({ command: 'loadDiag', data: contentString, fileName: item.pt});
+			panel.webview.postMessage({ command: 'loadDiag', data: contentString, fileName: fileName});
 		}).catch(error => {
 			console.error('Error loading file:', error);
 		});
