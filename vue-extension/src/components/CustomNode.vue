@@ -146,11 +146,18 @@ const handleMessage = (event) => {
 </template>
 
 <style scope>
+  .tool-icon1:hover {
+    cursor: pointer;
+  }
+  .tool-icon2:hover {
+    cursor: pointer;
+  }
   .custom_node {
     background-color: rgb(240, 208, 166);
     padding: 0;
     width: 100%;
     display: flex;
+    min-height: 38px;
   }
   .ta {
     font-size: 0.5em;
