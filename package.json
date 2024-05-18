@@ -3,6 +3,7 @@
   "displayName": "CodeFlowDiag",
   "description": "",
   "version": "0.0.1",
+  "icon": "structure-diagram-icon.png",
   "engines": {
     "vscode": "^1.88.0"
   },
@@ -16,7 +17,7 @@
       "explorer": [
         {
           "id": "codeflowdiag.myTreeView",
-          "name": "My Tree View",
+          "name": "CFD List",
           "when": "extensionActivated"
         }
       ]

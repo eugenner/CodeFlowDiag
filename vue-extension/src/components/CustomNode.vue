@@ -11,7 +11,7 @@ import { useEventsBus } from './EventsBus.vue';
 const { removeNodes, updateNode } = useVueFlow();
 
 // const { emit } = useEventsBus();
-const emit = defineEmits(['cloneNodeAction'])
+const emit = defineEmits(['cloneNodeAction', 'isEdit'])
 
 const props = defineProps(['id', 'data'])
 
@@ -89,6 +89,7 @@ watch(isEdit, (newValue, oldValue) => {
   if (newValue) {
     adjustTextareaSize();
   }
+  emit('isEdit', isEdit.value);
 });
 
 // vs code api intercommunication
@@ -141,7 +142,7 @@ const handleMessage = (event) => {
     <div v-show="!isEdit" v-html="md.render(data.text)"></div>
     <textarea class="ta nowheel nodrag" ref="textareaRef"
       @blur="blur" tabindex="1" v-show="isEdit" v-model="data.text" 
-      :rows="1 + data.text.split('\n').length"/>
+      :rows="1 + data.text.split('\n').length" />
   </div>
 </template>
 

@@ -1,7 +1,7 @@
 <script setup>
-import { VueFlow, useVueFlow, BaseEdge, EdgeLabelRenderer } from '@vue-flow/core';
+import { VueFlow, useVueFlow } from '@vue-flow/core';
 import { Controls, ControlButton } from '@vue-flow/controls';
-import { ref, watch, watchEffect, inject, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faFloppyDisk, faQuestionCircle } from '@fortawesome/free-regular-svg-icons'
@@ -9,7 +9,7 @@ import { Background } from '@vue-flow/background'
 
 import { markRaw } from 'vue'
 import CustomNode from './components/CustomNode.vue'
-import EdgeWithButton from './components/EdgeWithButton.vue'
+import CustomEdge from './components/CustomEdge.vue'
 
 import { useEventsBus } from './components/EventsBus.vue';
 
@@ -38,7 +38,9 @@ let store = useVueFlow();
 let metaData = {nextId: 10, fileName: ''};
 let fileName = ref('cfd.json');
 let clickStack = [1, 2];
-let showSaveInfo = ref(false);
+const showSaveInfo = ref(false);
+let isNodeEditState = false;
+let isEdgeEditState = false;
 const defaultNodeStyle = {
   background: '#ef467e',
   color: 'white',
@@ -54,7 +56,7 @@ const nodeTypes = {
 }
 
 const edgeTypes = {
-  button: markRaw(EdgeWithButton)
+  custom: markRaw(CustomEdge)
 }
 
 function onConnect(params) {
@@ -62,7 +64,7 @@ function onConnect(params) {
     id: + params.source + '-' + params.target,
     target: params.target,
     source: params.source,
-    type: 'button',
+    type: 'custom',
     data: { text: '' },
     updatable: true
   }
@@ -128,7 +130,9 @@ const onDblClick = (e) => {
   clickStack.shift();
   if (clickStack[1] - clickStack[0] < 300) {
     console.log('double click happens: ' + e.pageX + ' : ' + e.pageY);
-    onAddNode();
+    if(!isNodeEditState && !isEdgeEditState) {
+      onAddNode();
+    }
   }
 }
 
@@ -149,6 +153,16 @@ function handleKeyDown(event) {
 function handleMouseMove(event) {
   mousePosition.x = event.clientX;
   mousePosition.y = event.clientY;
+}
+
+const nodeEditStateAction = (val) => {
+  console.log('nodeEditStateAction: ' + val)
+  isNodeEditState = val;
+}
+
+const edgeEditStateAction = (val) => {
+  console.log('edgeEditStateAction: ' + val)
+  isEdgeEditState = val;
 }
 
 const cloneNodeAction = (val) => {
@@ -188,6 +202,10 @@ const handleMessage = (event) => {
         break;
   }
 };
+
+const showInfo = () => {
+  // TODO
+}
 
 onBeforeUnmount(() => {
   window.removeEventListener('message', handleMessage);
@@ -231,7 +249,7 @@ onMounted(() => {
       target: '2',
       source: '1',
       updatable: true,
-      type: 'button',
+      type: 'custom',
       data: { text: '1' },
     },
     {
@@ -239,7 +257,7 @@ onMounted(() => {
       target: '3',
       source: '1',
       updatable: true,
-      type: 'button',
+      type: 'custom',
       data: { text: '2' },
     }
   );
@@ -257,8 +275,15 @@ onMounted(() => {
       @pane-ready="onPaneReady" @edge-update="onEdgeUpdate" 
       @connect="onConnect" @click="onDblClick"  
       :zoom-on-double-click="false">
+
       <template #node-custom="nodeProps">
-        <CustomNode :id="nodeProps.id" :data="nodeProps.data" @cloneNodeAction="cloneNodeAction(nodeProps.id)"/>
+        <CustomNode v-bind="nodeProps"
+          @cloneNodeAction="cloneNodeAction(nodeProps.id)"
+          @isEdit="nodeEditStateAction" />
+      </template>
+      <template #edge-custom="edgeProps">
+        <CustomEdge v-bind="edgeProps" 
+          @isEdgeEdit="edgeEditStateAction" />
       </template>
       <Background />
       <Controls position="top-right">

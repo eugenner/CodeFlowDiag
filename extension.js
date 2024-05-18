@@ -1,57 +1,46 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 
 const vscode = require('vscode');
 const path = require('path');
 
-/*
-
-https://code.visualstudio.com/api/extension-guides/web-extensions
-
-
-The opened workspace or folder is on a virtual file system. 
-Access to workspace files needs to go through the VS Code file 
-system API accessible at vscode.workspace.fs.
-*/
-
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 /**
  * @param {vscode.ExtensionContext} context
  */
 
-
-
-// Define a sample TreeDataProvider
 class MyTreeDataProvider {
-    constructor(context) {
+	constructor(context) {
 		this.context = context;
-        this._onDidChangeTreeData = new vscode.EventEmitter();
-        this.onDidChangeTreeData = this._onDidChangeTreeData.event;
-    }
+		this._onDidChangeTreeData = new vscode.EventEmitter();
+		this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+	}
 
-    getTreeItem(element) {
-        return {
-            label: element.label,
+	getTreeItem(element) {
+		return {
+			label: element.label,
 			pt: element.pt,
 			iconPath: new vscode.ThemeIcon("file"),
-            collapsibleState: vscode.TreeItemCollapsibleState.None
-        };
-    }
+			collapsibleState: vscode.TreeItemCollapsibleState.None
+		};
+	}
 
-	getChildren() {
-        return vscode.workspace.findFiles('**/*.json',  'node_modules/**').then(files => {
-            return files.map(file => {
+	getChildren(element) {
+		return vscode.workspace.findFiles('**/*.json', 'node_modules/**').then(async files => {
+			const filteredFiles = [];
+			for (const fileUri of files) {
+				const readData = await vscode.workspace.fs.readFile(fileUri);
+				const readStr = Buffer.from(readData).toString('utf8');
+				if (readStr.substring(0, 12) === '{"diagData":') {
+					filteredFiles.push(fileUri);
+				}
+			}
+
+			return filteredFiles.map(file => {
 				const relativePath = vscode.workspace.asRelativePath(file.path);
-                return {
-                    label: relativePath, pt: file.path
-                };
-            });
-        });
-    }
-
-	_onDidChangeTreeData = new vscode.EventEmitter();
-  	onDidChangeTreeData = this._onDidChangeTreeData.event;
+				return {
+					label: relativePath, pt: file.path
+				};
+			}).sort((el1, el2) => el1.label.localeCompare(el2.label));
+		});
+	}
 
 	refresh() {
 		this._onDidChangeTreeData.fire();
@@ -60,29 +49,29 @@ class MyTreeDataProvider {
 let treeDataProvider;
 function createTreeView(context) {
 	treeDataProvider = new MyTreeDataProvider(context);
-    const treeView = vscode.window.createTreeView('codeflowdiag.myTreeView', {
-        treeDataProvider,
-		showCollapseAll: true
-    });
+	const treeView = vscode.window.createTreeView('codeflowdiag.myTreeView', {
+		treeDataProvider,
+		showCollapseAll: false
+	});
 
-    return treeView;
+	return treeView;
 }
 
 function writeToFile(filePath, data) {
-    const uri = vscode.Uri.file(filePath);
-    const buffer = Buffer.from(data);
+	const uri = vscode.Uri.file(filePath);
+	const buffer = Buffer.from(data);
 
-    vscode.workspace.fs.writeFile(uri, buffer)
-        .then(() => {
-            vscode.window.showInformationMessage('Data written to file successfully.');
-        })
-        .catch(error => {
-            vscode.window.showErrorMessage('Error writing to file: ' + error.message);
-        });
+	vscode.workspace.fs.writeFile(uri, buffer)
+		.then(() => {
+			vscode.window.showInformationMessage('Data written to file successfully.');
+		})
+		.catch(error => {
+			vscode.window.showErrorMessage('Error writing to file: ' + error.message);
+		});
 }
 
 function activate(context) {
-	
+
 	// for "when" in menus of editor/context
 	vscode.commands.executeCommand('setContext', 'extensionActivated', true);
 
@@ -94,17 +83,17 @@ function activate(context) {
 	let commandTDRefresh = vscode.commands.registerCommand('treeDataProvider.refresh', (link) => {
 		treeDataProvider.refresh();
 	});
-	context.subscriptions.push(commandTDRefresh); 
+	context.subscriptions.push(commandTDRefresh);
 
 
 	// Some vs code api command
 	let commandListFiles = vscode.commands.registerCommand('codeflowdiag.listFiles', (p, nodeId) => {
-		
+
 		vscode.window.showInformationMessage('workspace: ' + vscode.workspace.name);
 		vscode.workspace.findFiles('**/*', '**​/node_modules/**', 10).then((uris) => {
 			// Map each URI to a relative path
 			// const relativePaths = uris.map((uri) => vscode.workspace.asRelativePath(uri));
-			p.webview.postMessage({ command: 'listFiles', data: uris, nodeId: nodeId});
+			p.webview.postMessage({ command: 'listFiles', data: uris, nodeId: nodeId });
 		});
 	});
 	context.subscriptions.push(commandListFiles);
@@ -113,23 +102,23 @@ function activate(context) {
 		vscode.window.showInformationMessage('ext clicked link: ' + link);
 		openEditorWithRelativePath(link.split('#')[0], link.split('#')[1]);
 	});
-	context.subscriptions.push(commandOpenLink); 
+	context.subscriptions.push(commandOpenLink);
 
 	// Copy relative path of source file opened in the current editor tab 
 	// (with #lines of selection first and last)
 	let disposableCSPAction = vscode.commands.registerCommand('codeflowdiag.copySrcPathAction', () => {
-        // Add your custom action logic here
-        vscode.window.showInformationMessage('Custom action executed!');
+		// Add your custom action logic here
+		vscode.window.showInformationMessage('Custom action executed!');
 		const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            // Get the URI of the active text editor's document
-            const documentUri = editor.document.uri;
+		if (editor) {
+			// Get the URI of the active text editor's document
+			const documentUri = editor.document.uri;
 
-            // Convert the document URI to a relative file path
-            const relativeFilePath = vscode.workspace.asRelativePath(documentUri);
-            
-            // Use the relative file path
-            vscode.window.showInformationMessage('Relative file path: ' + relativeFilePath);
+			// Convert the document URI to a relative file path
+			const relativeFilePath = vscode.workspace.asRelativePath(documentUri);
+
+			// Use the relative file path
+			vscode.window.showInformationMessage('Relative file path: ' + relativeFilePath);
 
 			// Get the selected text range
 			const selection = editor.selection;
@@ -137,7 +126,7 @@ function activate(context) {
 			// Get the start and end line numbers of the selected text
 			const startLine = selection.start.line + 1;
 			const endLine = selection.end.line + 1;
-            vscode.window.showInformationMessage(`start end lines: ${startLine} ${endLine}`);
+			vscode.window.showInformationMessage(`start end lines: ${startLine} ${endLine}`);
 			let linkText = relativeFilePath + `#L${startLine}-L${endLine}`;
 			// https://vscode.dev/github/eugenner/Fractals3DV2/blob/main/index.html#L64-L70
 			vscode.env.clipboard.writeText(linkText).then(() => {
@@ -148,30 +137,30 @@ function activate(context) {
 				vscode.window.showErrorMessage('Failed to copy to clipboard: ' + err);
 			});
 
-        } else {
-            vscode.window.showErrorMessage('No active text editor.');
-        }
-    });
-    context.subscriptions.push(disposableCSPAction);
+		} else {
+			vscode.window.showErrorMessage('No active text editor.');
+		}
+	});
+	context.subscriptions.push(disposableCSPAction);
 
 	let disposableSDAction = vscode.commands.registerCommand('codeflowdiag.saveDiag', (content) => {
 		fileName = JSON.parse(content).metaData.fileName;
-        // Add your custom action logic here
-        vscode.window.showInformationMessage('Save file: ' + fileName);
+		// Add your custom action logic here
+		vscode.window.showInformationMessage('Save file: ' + fileName);
 		const workspaceFolders = vscode.workspace.workspaceFolders;
 		if (!workspaceFolders || workspaceFolders.length === 0) {
 			vscode.window.showErrorMessage('No workspace folder opened.');
 			return;
 		}
-	
+
 		const workspacePath = workspaceFolders[0].uri.fsPath;
 		const filePath = path.join(workspacePath, fileName);
 		vscode.window.showInformationMessage(`File ${fileName} save started.`);
 		writeToFile(filePath, content);
 		treeDataProvider.refresh();
-    });
-    context.subscriptions.push(disposableSDAction);	
-	
+	});
+	context.subscriptions.push(disposableSDAction);
+
 	let panel;
 	let webview = vscode.commands.registerCommand('codeflowdiag.runIt', () => {
 		vscode.commands.executeCommand('setContext', 'extensionActivated', true);
@@ -183,13 +172,13 @@ function activate(context) {
 			vscode.commands.executeCommand('setContext', 'extensionActivated', false);
 			// panel.webview.deactivate();
 			// treeView.dispose();
-			
+
 		});
 		// Listen for messages from the webview
 		panel.webview.onDidReceiveMessage(message => {
 			switch (message.command) {
 				case 'listFiles':
-				 	vscode.commands.executeCommand('codeflowdiag.listFiles', panel, message.nodeId); // should be "panel" passed this way?
+					vscode.commands.executeCommand('codeflowdiag.listFiles', panel, message.nodeId); // should be "panel" passed this way?
 					vscode.window.showInformationMessage('executeCommand listFiles id: ' + message.nodeId);
 					break;
 				case 'linkClicked':
@@ -205,12 +194,12 @@ function activate(context) {
 	});
 
 	let disposableOTVIAction = vscode.commands.registerCommand('codeflowdiag.OpenTreeViewItem', (item) => {
-        vscode.window.showInformationMessage('Open action executed! ' + item.pt);
+		vscode.window.showInformationMessage('Open action executed! ' + item.pt);
 		const uri = vscode.Uri.file(item.pt);
 		vscode.workspace.fs.readFile(uri).then(fileContent => {
 			const contentString = Buffer.from(fileContent).toString('utf-8');
 			const fileName = vscode.workspace.asRelativePath(item.pt);
-			panel.webview.postMessage({ command: 'loadDiag', data: contentString, fileName: fileName});
+			panel.webview.postMessage({ command: 'loadDiag', data: contentString, fileName: fileName });
 		}).catch(error => {
 			console.error('Error loading file:', error);
 		});
@@ -219,31 +208,31 @@ function activate(context) {
 }
 
 async function openEditorWithRelativePath(relativePath, positionInDocument) {
-    try {
-        // Construct the absolute path by joining the workspace root path and the relative path
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0]; // Assuming you have only one workspace folder
-        if (!workspaceFolder) {
-            vscode.window.showErrorMessage('No workspace folder found.');
-            return;
-        }
-        
-        const absolutePath = path.join(workspaceFolder.uri.fsPath, relativePath);
+	try {
+		// Construct the absolute path by joining the workspace root path and the relative path
+		const workspaceFolder = vscode.workspace.workspaceFolders?.[0]; // Assuming you have only one workspace folder
+		if (!workspaceFolder) {
+			vscode.window.showErrorMessage('No workspace folder found.');
+			return;
+		}
 
-        // Convert the absolute path to a URI
-        const uri = vscode.Uri.file(absolutePath);
+		const absolutePath = path.join(workspaceFolder.uri.fsPath, relativePath);
 
-        // Open the text document associated with the provided URI
-        const document = await vscode.workspace.openTextDocument(uri);
+		// Convert the absolute path to a URI
+		const uri = vscode.Uri.file(absolutePath);
 
-        // Show the opened document in an editor
+		// Open the text document associated with the provided URI
+		const document = await vscode.workspace.openTextDocument(uri);
+
+		// Show the opened document in an editor
 		let lineNumber = parseInt(positionInDocument.substring(1));
-        await vscode.window.showTextDocument(document,
+		await vscode.window.showTextDocument(document,
 			{ selection: new vscode.Range(lineNumber, 0, lineNumber, 0) });
 
-    } catch (error) {
-        // Handle any errors
-        vscode.window.showErrorMessage('Failed to open document: ' + error);
-    }
+	} catch (error) {
+		// Handle any errors
+		vscode.window.showErrorMessage('Failed to open document: ' + error);
+	}
 }
 
 function prepareWebView(context) {
@@ -252,14 +241,14 @@ function prepareWebView(context) {
 		"Code Flow Diag",
 		"CodeFlowDiag",
 		vscode.ViewColumn.One,
-		{	
+		{
 			enableScripts: true,
 			retainContextWhenHidden: true,
 			localResourceRoots: [
-                vscode.Uri.file(
-                    path.join(context.extensionPath, "dist", "vue-dist", "assets")
-                ),
-            ],
+				vscode.Uri.file(
+					path.join(context.extensionPath, "dist", "vue-dist", "assets")
+				),
+			],
 		}
 	);
 
@@ -269,7 +258,7 @@ function prepareWebView(context) {
 	// });
 
 	// type-hierarchy-sub
-	newPanel.iconPath = vscode.Uri.file(context.asAbsolutePath('./hierarchy-6.png'));
+	newPanel.iconPath = vscode.Uri.file(context.asAbsolutePath('./structure-diagram-icon.png'));
 	// newPanel.iconPath = (new vscode.ThemeIcon('globe')).filePath;
 	// const globeIcon = new vscode.ThemeIcon('globe');
 	// newPanel.iconPath = vscode.ThemeIcon.Globe;
@@ -277,16 +266,16 @@ function prepareWebView(context) {
 	// newPanel.iconPath = vscode.Uri.file(path.join(context.extensionPath, 'icons', 'cat.png'));
 
 	const dependencyNameList = [
-        "index.css",
-        "index.js"
-    ];
-    const dependencyList = dependencyNameList.map((item) =>
+		"index.css",
+		"index.js"
+	];
+	const dependencyList = dependencyNameList.map((item) =>
 		newPanel.webview.asWebviewUri(
-            vscode.Uri.file(
-                path.join(context.extensionPath, "dist", "vue-dist", "assets", item)
-            )  
-        )
-    );
+			vscode.Uri.file(
+				path.join(context.extensionPath, "dist", "vue-dist", "assets", item)
+			)
+		)
+	);
 	newPanel.webview.html = `<!DOCTYPE html>
 	<html lang="en">
 	<head>
@@ -312,7 +301,7 @@ function prepareWebView(context) {
 function deactivate() {
 	console.log('deactivate');
 	vscode.commands.executeCommand('setContext', 'extensionActivated', false);
- }
+}
 
 module.exports = {
 	activate,

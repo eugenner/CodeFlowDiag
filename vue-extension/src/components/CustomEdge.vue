@@ -1,8 +1,7 @@
 <script setup>
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useVueFlow } from '@vue-flow/core'
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import markdownit from 'markdown-it';
-
 
 const props = defineProps({
   id: {
@@ -51,6 +50,8 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['isEdgeEdit'])
+
 const showMenu = ref(false);
 const md = markdownit({breaks: true, html: false});
 const { onEdgeClick } = useVueFlow()
@@ -62,6 +63,7 @@ const path = computed(() => getBezierPath(props))
 
 
 onEdgeClick((me) => {
+  emit('isEdgeEdit', true); // TODO testing
   if (me.edge.id === props.id) {
     console.log('id: ' + props.id + ' is selected: ' + me.edge.selected);
     console.log('edge clicked: ' + me.edge.id + ' showMenu.value: ' + showMenu.value);
@@ -74,8 +76,6 @@ const editLabel = () => {
   isEdit.value = !isEdit.value;
 }
 
-
-
 const blur = function(event) {
   console.log('blur');
   if(event.relatedTarget?.classList.contains('ta')) {
@@ -84,6 +84,11 @@ const blur = function(event) {
   isEdit.value = false;
   showMenu.value = false;
 }
+
+watch(isEdit, () => {
+  console.log('edge edit: ' + isEdit.value);
+  emit('isEdgeEdit', isEdit.value);
+});
 
 </script>
 
