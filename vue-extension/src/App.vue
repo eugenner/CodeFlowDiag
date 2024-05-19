@@ -1,10 +1,10 @@
 <script setup>
-import { VueFlow, useVueFlow } from '@vue-flow/core';
+import { VueFlow, useVueFlow, Panel } from '@vue-flow/core';
 import { Controls, ControlButton } from '@vue-flow/controls';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faFloppyDisk, faQuestionCircle } from '@fortawesome/free-regular-svg-icons'
+import { faFloppyDisk, faQuestionCircle, faXmarkCircle } from '@fortawesome/free-regular-svg-icons'
 import { Background } from '@vue-flow/background'
 
 import { markRaw } from 'vue'
@@ -39,6 +39,7 @@ let metaData = {nextId: 10, fileName: ''};
 let fileName = ref('cfd.json');
 let clickStack = [1, 2];
 const showSaveInfo = ref(false);
+const showHelpInfo = ref(false);
 let isNodeEditState = false;
 let isEdgeEditState = false;
 const defaultNodeStyle = {
@@ -204,7 +205,7 @@ const handleMessage = (event) => {
 };
 
 const showInfo = () => {
-  // TODO
+  showHelpInfo.value = !showHelpInfo.value;
 }
 
 onBeforeUnmount(() => {
@@ -294,10 +295,23 @@ onMounted(() => {
           <FontAwesomeIcon :icon="faQuestionCircle" />
         </ControlButton>
       </Controls>
+      <Panel v-if="showSaveInfo || showHelpInfo" class="process-panel" position="top-left">
+        <div class="layout-panel">
+          <div v-if="showSaveInfo">
+            <label>Save to file: </label>
+            <input type="text" v-model="fileName" @keyup.enter="saveDiag"/>
+          </div>
+          <div v-if="showHelpInfo">
+            <label>Help TEST 
+            </label>
+            <button @click="showInfo" class="help-close-btn">
+              <FontAwesomeIcon :icon="faXmarkCircle" />
+            </button>
+          </div>
+        </div>
+      </Panel>
     </VueFlow>
-    <div v-if="showSaveInfo" style="position: absolute; top: 10px;">
-      fileName: <input type="text" v-model="fileName" @keyup.enter="saveDiag"/>
-    </div>
+
   </div>
 </template>
 
@@ -329,5 +343,35 @@ body,
 
 .vue-flow__background {
   background-color: azure
+}
+
+
+.process-panel,
+.layout-panel {
+  display: flex;
+  gap: 010px;
+}
+
+.help-close-btn {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  background-color: inherit;
+  border: inherit;
+  width: 10px;
+}
+
+.process-panel {
+  background-color: #fbfabe;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.process-panel label {
+  color: rgb(21, 3, 59);
+  font-size: 12px;
 }
 </style>

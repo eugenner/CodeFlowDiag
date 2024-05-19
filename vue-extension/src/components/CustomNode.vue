@@ -147,6 +147,9 @@ const handleMessage = (event) => {
 </template>
 
 <style scope>
+  li {
+    text-align: left;
+  }
   .tool-icon1:hover {
     cursor: pointer;
   }
