@@ -6,7 +6,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faFloppyDisk, faQuestionCircle, faXmarkCircle } from '@fortawesome/free-regular-svg-icons'
 import { Background } from '@vue-flow/background'
-
+import markdownit from 'markdown-it'
 import { markRaw } from 'vue'
 import CustomNode from './components/CustomNode.vue'
 import CustomEdge from './components/CustomEdge.vue'
@@ -15,7 +15,7 @@ import { useEventsBus } from './components/EventsBus.vue';
 
 
 const { bus } = useEventsBus();
-
+const md = markdownit({breaks: true, html: false});
 const { addNodes, removeNodes, fromObject, findNode,
   updateEdge, addEdges, onPaneReady, toObject, snapToGrid, setNodes, setEdges, events } = useVueFlow();
 snapToGrid.value = true;
@@ -208,6 +208,29 @@ const showInfo = () => {
   showHelpInfo.value = !showHelpInfo.value;
 }
 
+const helpText = `
+Help
+* Double click to create a new Node
+* Click node's edit icon to  
+  * Edit
+    * MarkDown content syntax
+  * Resize
+  * Clone
+  * Src link
+    * Open source file, select lines, press right button and choose "Copy source path (code flow diag)" 
+    * After, click the "src link" button to connect the Node with the source file
+    * Src unlink - to delete connection between node and source
+  * Delete
+* Save data
+  * Click save icon
+  * Choose file name to save, path is relative to the current project
+  * Press Enter to save the file
+* Load data
+  * CFD LIST panel
+    * Refresh to update files list
+    * Edit button to open saved Diagram
+`;
+
 onBeforeUnmount(() => {
   window.removeEventListener('message', handleMessage);
   window.removeEventListener('mousemove', handleMouseMove);
@@ -288,7 +311,7 @@ onMounted(() => {
       </template>
       <Background />
       <Controls position="top-right">
-        <ControlButton @mousedown="showSaveInfo = true">
+        <ControlButton @mousedown="showSaveInfo = !showSaveInfo">
           <FontAwesomeIcon :icon="faFloppyDisk" />
         </ControlButton>
         <ControlButton @click="showInfo">
@@ -297,13 +320,15 @@ onMounted(() => {
       </Controls>
       <Panel v-if="showSaveInfo || showHelpInfo" class="process-panel" position="top-left">
         <div class="layout-panel">
-          <div v-if="showSaveInfo">
+          <div v-if="showSaveInfo" style="padding-right: 8px;">
             <label>Save to file: </label>
-            <input type="text" v-model="fileName" @keyup.enter="saveDiag"/>
+            <button @click="showSaveInfo = false" class="help-close-btn">
+              <FontAwesomeIcon :icon="faXmarkCircle" />
+            </button>
+            <input type="text" v-model="fileName" @keyup.enter="saveDiag" />
           </div>
           <div v-if="showHelpInfo">
-            <label>Help TEST 
-            </label>
+            <div v-html="md.render(helpText)"></div> 
             <button @click="showInfo" class="help-close-btn">
               <FontAwesomeIcon :icon="faXmarkCircle" />
             </button>
@@ -354,8 +379,8 @@ body,
 
 .help-close-btn {
   position: absolute;
-  top: 0;
-  right: 8px;
+  top: 0px;
+  right: 9px;
   background-color: inherit;
   border: inherit;
   width: 10px;
