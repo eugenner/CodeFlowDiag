@@ -321,11 +321,12 @@ onMounted(() => {
       <Panel v-if="showSaveInfo || showHelpInfo" class="process-panel" position="top-left">
         <div class="layout-panel">
           <div v-if="showSaveInfo" style="padding-right: 8px;">
-            <label>Save to file: </label>
+            <span>File name: </span>
             <button @click="showSaveInfo = false" class="help-close-btn">
               <FontAwesomeIcon :icon="faXmarkCircle" />
             </button>
             <input type="text" v-model="fileName" @keyup.enter="saveDiag" />
+            <button class="save-btn">save</button>
           </div>
           <div v-if="showHelpInfo">
             <div v-html="md.render(helpText)"></div> 
@@ -384,6 +385,21 @@ body,
   background-color: inherit;
   border: inherit;
   width: 10px;
+}
+
+.help-close-btn:hover {
+    cursor: pointer;
+}
+
+.save-btn {
+  background-color: inherit;
+  border-color: #f4050561;
+  border-radius: 10px;
+  margin-left: 4px;
+}
+
+.save-btn:hover {
+    cursor: pointer;
 }
 
 .process-panel {
