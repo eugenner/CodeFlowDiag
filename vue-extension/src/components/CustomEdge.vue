@@ -63,7 +63,6 @@ const path = computed(() => getBezierPath(props))
 
 
 onEdgeClick((me) => {
-  emit('isEdgeEdit', true); // TODO testing
   if (me.edge.id === props.id) {
     console.log('id: ' + props.id + ' is selected: ' + me.edge.selected);
     console.log('edge clicked: ' + me.edge.id + ' showMenu.value: ' + showMenu.value);
