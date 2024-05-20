@@ -139,7 +139,7 @@ const handleMessage = (event) => {
     </NodeToolbar>
     <Handle type="target" :position="Position.Top" />
     <Handle type="source" :position="Position.Bottom" />
-    <div v-show="!isEdit" v-html="md.render(data.text)"></div>
+    <div class="tr" v-show="!isEdit" v-html="md.render(data.text)"></div>
     <textarea class="ta nowheel nodrag" ref="textareaRef"
       @blur="blur" tabindex="1" v-show="isEdit" v-model="data.text" 
       :rows="1 + data.text.split('\n').length" />
@@ -147,9 +147,6 @@ const handleMessage = (event) => {
 </template>
 
 <style scope>
-  li {
-    text-align: left;
-  }
   .tool-icon1:hover {
     cursor: pointer;
   }
@@ -162,6 +159,9 @@ const handleMessage = (event) => {
     width: 100%;
     display: flex;
     min-height: 38px;
+  }
+  .tr {
+    text-align: left;
   }
   .ta {
     font-size: 0.5em;
