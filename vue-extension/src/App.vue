@@ -210,8 +210,8 @@ const showInfo = () => {
 
 const helpText = `
 Help
-* Double click to create a new Node
-* Click node's edit icon to  
+* Double-click to create a new node
+* Click node's edit icon to:
   * Edit
     * MarkDown content syntax
   * Resize
@@ -227,7 +227,7 @@ Help
   * Press Enter to save the file
 * Load data
   * CFD LIST panel
-    * Refresh to update files list
+    * Click the Refresh icon to update the file list
     * Edit button to open saved Diagram
 `;
 
