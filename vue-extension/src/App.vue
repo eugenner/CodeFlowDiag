@@ -101,7 +101,7 @@ function onAddNode(nodeToClone) {
       type: 'custom',
       class: 'custom_node vue-flow__node vue-flow__node-default nopan draggable selectable',
       position: { x: nodeToClone.position.x + 120, y: nodeToClone.position.y - 40 },
-      data: { text: nodeToClone.data.text }
+      data: { text: nodeToClone.data.text, bgColor: nodeToClone.data.bgColor }
     })
   } else {
     addNodes({
@@ -109,7 +109,7 @@ function onAddNode(nodeToClone) {
       type: 'custom',
       class: 'custom_node vue-flow__node vue-flow__node-default nopan draggable selectable',
       position: vueFlowInstance.project({ x: mousePosition.x, y: mousePosition.y }),
-      data: { text: '' }
+      data: { text: '', bgColor: '' }
     })
   }
 
@@ -246,21 +246,21 @@ onMounted(() => {
     {
       id: '1',
       type: 'custom',
-      data: { text: 'one' },
+      data: { text: 'one one', bgColor: '#a1a4f7' },
       position: { x: 100, y: 100 },
       class: 'vue-flow__node-default nopan draggable selectable'
     },
     {
       id: '2',
       type: 'custom',
-      data: { text: 'two' },
+      data: { text: 'two', bgColor: '#dfb3b3' },
       position: { x: 25, y: 200 },
       class: 'vue-flow__node-default nopan draggable selectable'
     },
     {
       id: '3',
       type: 'custom',
-      data: { text: 'three' },
+      data: { text: 'three', bgColor: '#dfb3b3' },
       position: { x: 200, y: 200 },
       class: 'vue-flow__node-default nopan draggable selectable'
     }

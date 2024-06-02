@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import { NodeToolbar } from '@vue-flow/node-toolbar'
 import { NodeResizer } from '@vue-flow/node-resizer'
@@ -15,12 +15,16 @@ const emit = defineEmits(['cloneNodeAction', 'isEdit'])
 
 const props = defineProps(['id', 'data'])
 
-const md = markdownit({breaks: true, html: false});
+const md = markdownit({ breaks: true, html: false });
 
 let isToolbarVisible = ref(false);
 let isResizerVisible = ref(false);
 let isEdit = ref(false);
 const textareaRef = ref(null);
+const bgColorSelect = ref(null);
+const bgColorPicked = ref(props.data.bgColor);
+const currentNode = ref(null);
+
 
 const edit = function (event) {
   console.log('edit')
@@ -28,7 +32,7 @@ const edit = function (event) {
   event.stopPropagation();
   event.preventDefault()
 }
-const resize = function(event) {
+const resize = function (event) {
   isResizerVisible.value = !isResizerVisible.value;
   event.preventDefault()
 }
@@ -37,14 +41,15 @@ const cloneBtnAction = () => {
   emit('cloneNodeAction');
 }
 
-const linkClicked = function() {
+const linkClicked = function () {
   console.log('linkClicked')
-  vscode.postMessage({ command: 'linkClicked', link: props.data.link});
+  vscode.postMessage({ command: 'linkClicked', link: props.data.link });
 }
 
-const nodeClicked = function() {
-  if(isEdit.value || isResizerVisible.value) return;
-  
+const nodeClicked = function () {
+  if (isEdit.value || isResizerVisible.value) return;
+  //bgColorSelect.value = '#965454'; //props.data.bgColor;
+    // TODO set bg color
   isToolbarVisible.value = !isToolbarVisible.value;
 }
 
@@ -52,7 +57,21 @@ const deleteNode = () => {
   removeNodes(['' + props.id])
 }
 
-const blur = function(event) {
+const blurBgColorSelect = function (event) {
+  console.log('blur bgColorSelect: ' + event.target.value);
+  props.data.bgColor = event.target.value;
+  currentNode.value.style.backgroundColor = event.target.value;
+  isEdit.value = false;
+  isToolbarVisible.value = false;
+  isResizerVisible.value = false;
+}
+
+const blur = function (event) {
+  console.log('blur started');
+  if (event.relatedTarget?.className == 'bgColorSelect') {
+    return;
+  }
+
   // console.log('blur target: ' + event.target + ' current target: ' + event.currentTarget)
   if(event.relatedTarget?.parentElement == event.target) {
     event.stopPropagation();
@@ -71,8 +90,6 @@ const adjustTextareaSize = () => {
   }
 };
 
-
-
 const srcLinkBtnAction = () => {
   navigator.clipboard.readText().then(clp => {
     console.log('srcLinkBtnAction: ' + clp)
@@ -82,7 +99,7 @@ const srcLinkBtnAction = () => {
 }
 
 const srcUnlinkBtnAction = () => {
-    props.data.link = '';
+  props.data.link = '';
 }
 
 watch(isEdit, (newValue, oldValue) => {
@@ -102,27 +119,33 @@ const handleMessage = (event) => {
   const result = event.data.data;
 
   switch (message.command) {
-      case 'listFiles':
-          console.log('listFiles: ' + JSON.stringify(result));
-          props.data.text.value += 'files: ' + JSON.stringify(result);
-          break;
+    case 'listFiles':
+      console.log('listFiles: ' + JSON.stringify(result));
+      props.data.text.value += 'files: ' + JSON.stringify(result);
+      break;
   }
 };
 
-  onMounted(() => {
-    // Add event listener when component is mounted
-    window.addEventListener('message', handleMessage);
-  });
+const nodeStyle = computed(() => ({
+  backgroundColor: props.data.bgColor
+}));
 
-  onBeforeUnmount(() => {
-    // Remove event listener when component is unmounted
-    window.removeEventListener('message', handleMessage);
-  });
+onMounted(() => {
+  // Add event listener when component is mounted
+  window.addEventListener('message', handleMessage);
+  console.log('bg color loaded: ' + props.data.bgColor);
+  // currentNode.value.style.backgroundColor = '#dfb3b3'; // props.data.bgColor;
+});
+
+onBeforeUnmount(() => {
+  // Remove event listener when component is unmounted
+  window.removeEventListener('message', handleMessage);
+});
 
 </script>
 
 <template>
-  <div @blur="blur" tabindex="0" class="custom_node">
+  <div @blur="blur" ref="currentNode" :style="nodeStyle" tabindex="0" class="custom_node">
     <div>
       <FontAwesomeIcon class="tool-icon1" :icon="faEdit" @click="nodeClicked" />
       <FontAwesomeIcon class="tool-icon2" :icon="faFileText" v-if="props.data.link" @click="linkClicked" />
@@ -135,50 +158,58 @@ const handleMessage = (event) => {
       <button @mousedown="srcLinkBtnAction" v-if="!props.data.link">src link</button>
       <button @mousedown="srcUnlinkBtnAction" v-if="props.data.link">src unlink</button>
       <button @mousedown="deleteNode">delete</button>
-      <label>({{ props.id }})</label>
+      <input @blur="blurBgColorSelect" v-model="bgColorPicked" ref="bgColorSelect" type="color" class="bgColorSelect" style="height: inherit; width: 20px;" />
+      <label style="padding-left: 10px;">({{ props.id }})</label>
     </NodeToolbar>
     <Handle type="target" :position="Position.Top" />
     <Handle type="source" :position="Position.Bottom" />
     <div class="tr" v-show="!isEdit" v-html="md.render(data.text)"></div>
-    <textarea class="ta nowheel nodrag" ref="textareaRef"
-      @blur="blur" tabindex="1" v-show="isEdit" v-model="data.text" 
+    <textarea class="ta nowheel nodrag" ref="textareaRef" @blur="blur" tabindex="1" v-show="isEdit" v-model="data.text"
       :rows="1 + data.text.split('\n').length" />
   </div>
 </template>
 
 <style scope>
-  .tool-icon1:hover {
-    cursor: pointer;
-  }
-  .tool-icon2:hover {
-    cursor: pointer;
-  }
-  .custom_node {
-    background-color: rgb(240, 208, 166);
-    padding: 0;
-    width: 100%;
-    display: flex;
-    min-height: 38px;
-  }
-  .tr {
-    text-align: left;
-  }
-  .ta {
-    font-size: 0.5em;
-    height: 100%;
-    width: 100%;
-  }
-  .tool-icon1 {
-    position: absolute;
-    right: 3px;
-    top: 3px;
-    color: rgb(113, 113, 231);
-  }
-  .tool-icon2 {
-    position: absolute;
-    right: 20px;
-    top: 3px;
-    color: rgb(106, 150, 99);
-  }
+.tool-icon1:hover {
+  cursor: pointer;
+}
 
+.tool-icon2:hover {
+  cursor: pointer;
+}
+
+.custom_node {
+  padding: 0;
+  width: 100%;
+  display: flex;
+  min-height: 38px;
+}
+
+.tr {
+  text-align: left;
+}
+
+.ta {
+  font-size: 0.5em;
+  height: 100%;
+  width: 100%;
+}
+
+.tool-icon1 {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  color: rgb(113, 113, 231);
+}
+
+.tool-icon2 {
+  position: absolute;
+  right: 20px;
+  top: 3px;
+  color: rgb(106, 150, 99);
+}
+
+.vue-flow__node-toolbar {
+  display: flex;
+}
 </style>

@@ -128,7 +128,6 @@ function activate(context) {
 			const endLine = selection.end.line + 1;
 			vscode.window.showInformationMessage(`start end lines: ${startLine} ${endLine}`);
 			let linkText = relativeFilePath + `#L${startLine}-L${endLine}`;
-			// https://vscode.dev/github/eugenner/Fractals3DV2/blob/main/index.html#L64-L70
 			vscode.env.clipboard.writeText(linkText).then(() => {
 				// Successful copy
 				vscode.window.showInformationMessage('Copied to clipboard!');
