@@ -326,7 +326,7 @@ onMounted(() => {
               <FontAwesomeIcon :icon="faXmarkCircle" />
             </button>
             <input type="text" v-model="fileName" @keyup.enter="saveDiag" />
-            <button class="save-btn" @click="saveDiag">save</button>
+            <button class="save-btn" @click="saveDiag">Save</button>
           </div>
           <div v-if="showHelpInfo">
             <div v-html="md.render(helpText)"></div> 
