@@ -246,7 +246,7 @@ onMounted(() => {
     {
       id: '1',
       type: 'custom',
-      data: { text: 'one one', bgColor: '#a1a4f7' },
+      data: { text: 'one', bgColor: '#a1a4f7' },
       position: { x: 100, y: 100 },
       class: 'vue-flow__node-default nopan draggable selectable'
     },
@@ -326,7 +326,7 @@ onMounted(() => {
               <FontAwesomeIcon :icon="faXmarkCircle" />
             </button>
             <input type="text" v-model="fileName" @keyup.enter="saveDiag" />
-            <button class="save-btn">save</button>
+            <button class="save-btn" @click="saveDiag">save</button>
           </div>
           <div v-if="showHelpInfo">
             <div v-html="md.render(helpText)"></div> 

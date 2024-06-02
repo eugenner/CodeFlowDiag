@@ -190,9 +190,9 @@ onBeforeUnmount(() => {
 }
 
 .ta {
-  font-size: 0.5em;
   height: 100%;
   width: 100%;
+  font-size: smaller;
 }
 
 .tool-icon1 {
