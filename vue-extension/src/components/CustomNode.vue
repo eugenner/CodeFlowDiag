@@ -159,7 +159,6 @@ onBeforeUnmount(() => {
       <button @mousedown="srcUnlinkBtnAction" v-if="props.data.link">src unlink</button>
       <button @mousedown="deleteNode">delete</button>
       <input @blur="blurBgColorSelect" v-model="bgColorPicked" ref="bgColorSelect" type="color" class="bgColorSelect" style="height: inherit; width: 20px;" />
-      <label style="padding-left: 10px;">({{ props.id }})</label>
     </NodeToolbar>
     <Handle type="target" :position="Position.Top" />
     <Handle type="source" :position="Position.Bottom" />

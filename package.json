@@ -1,11 +1,16 @@
 {
   "name": "codeflowdiag",
   "displayName": "CodeFlowDiag",
+  "publisher": "eugene-bolshakov",
   "description": "",
   "version": "0.0.1",
   "icon": "structure-diagram-icon.png",
   "engines": {
     "vscode": "^1.88.0"
+  },
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/eugenner/CodeFlowDiag"
   },
   "categories": [
     "Other"
