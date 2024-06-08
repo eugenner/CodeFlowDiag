@@ -21,8 +21,6 @@ let isToolbarVisible = ref(false);
 let isResizerVisible = ref(false);
 let isEdit = ref(false);
 const textareaRef = ref(null);
-const bgColorSelect = ref(null);
-const bgColorPicked = ref(props.data.bgColor);
 const currentNode = ref(null);
 
 
@@ -48,8 +46,6 @@ const linkClicked = function () {
 
 const nodeClicked = function () {
   if (isEdit.value || isResizerVisible.value) return;
-  //bgColorSelect.value = '#965454'; //props.data.bgColor;
-    // TODO set bg color
   isToolbarVisible.value = !isToolbarVisible.value;
 }
 
@@ -110,6 +106,7 @@ watch(isEdit, (newValue, oldValue) => {
 });
 
 // vs code api intercommunication
+/* TODO 
 const handleMessage = (event) => {
   if(event.data.nodeId != props.id)
     return;
@@ -125,6 +122,7 @@ const handleMessage = (event) => {
       break;
   }
 };
+*/ 
 
 const nodeStyle = computed(() => ({
   backgroundColor: props.data.bgColor
@@ -132,14 +130,14 @@ const nodeStyle = computed(() => ({
 
 onMounted(() => {
   // Add event listener when component is mounted
-  window.addEventListener('message', handleMessage);
+  // window.addEventListener('message', handleMessage);
   console.log('bg color loaded: ' + props.data.bgColor);
   // currentNode.value.style.backgroundColor = '#dfb3b3'; // props.data.bgColor;
 });
 
 onBeforeUnmount(() => {
   // Remove event listener when component is unmounted
-  window.removeEventListener('message', handleMessage);
+  // window.removeEventListener('message', handleMessage);
 });
 
 </script>
@@ -158,7 +156,8 @@ onBeforeUnmount(() => {
       <button @mousedown="srcLinkBtnAction" v-if="!props.data.link">src link</button>
       <button @mousedown="srcUnlinkBtnAction" v-if="props.data.link">src unlink</button>
       <button @mousedown="deleteNode">delete</button>
-      <input @blur="blurBgColorSelect" v-model="bgColorPicked" ref="bgColorSelect" type="color" class="bgColorSelect" style="height: inherit; width: 20px;" />
+      <input @blur="blurBgColorSelect" v-model="nodeStyle.backgroundColor" type="color" 
+        class="bgColorSelect" style="height: inherit; width: 20px;" />
     </NodeToolbar>
     <Handle type="target" :position="Position.Top" />
     <Handle type="source" :position="Position.Bottom" />

@@ -197,9 +197,9 @@ const handleMessage = (event) => {
         console.log('loaded file name: ' + event.data.fileName)
         fileName.value = event.data.fileName;
         metaData = json.metaData;
-        // fromObject(json.diagData);
-        setNodes(json.diagData.nodes)
-        setEdges(json.diagData.edges)
+        fromObject(json.diagData);
+        // setNodes(json.diagData.nodes);
+        // setEdges(json.diagData.edges);
         break;
   }
 };
