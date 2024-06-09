@@ -159,8 +159,10 @@ onBeforeUnmount(() => {
       <input @blur="blurBgColorSelect" v-model="nodeStyle.backgroundColor" type="color" 
         class="bgColorSelect" style="height: inherit; width: 20px;" />
     </NodeToolbar>
-    <Handle type="target" :position="Position.Top" />
-    <Handle type="source" :position="Position.Bottom" />
+    <Handle id="top" type="target" :position="Position.Top" />
+    <Handle id="left" type="target" :position="Position.Left" />
+    <Handle id="botton" type="source" :position="Position.Bottom" />
+    <Handle id="right" type="source" :position="Position.Right" />
     <div class="tr" v-show="!isEdit" v-html="md.render(data.text)"></div>
     <textarea class="ta nowheel nodrag" ref="textareaRef" @blur="blur" tabindex="1" v-show="isEdit" v-model="data.text"
       :rows="1 + data.text.split('\n').length" />

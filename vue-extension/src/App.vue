@@ -13,6 +13,7 @@ import CustomEdge from './components/CustomEdge.vue'
 
 import { useEventsBus } from './components/EventsBus.vue';
 
+import exampleData from './assets/cfd.json';
 
 const { bus } = useEventsBus();
 const md = markdownit({breaks: true, html: false});
@@ -63,8 +64,10 @@ const edgeTypes = {
 function onConnect(params) {
   const newEdge = {
     id: + params.source + '-' + params.target,
-    target: params.target,
     source: params.source,
+    sourceHandle: params.sourceHandle,
+    target: params.target,
+    targetHandle: params.targetHandle,
     type: 'custom',
     data: { text: '' },
     updatable: true
@@ -221,10 +224,10 @@ Help
     * After, click the "src link" button to connect the Node with the source file
     * Src unlink - to delete connection between node and source
   * Delete
+  * Change node's background color
 * Save data
   * Click save icon
   * Choose file name to save, path is relative to the current project
-  * Press Enter to save the file
 * Load data
   * CFD LIST panel
     * Click the Refresh icon to update the file list
@@ -241,7 +244,8 @@ onMounted(() => {
   window.addEventListener('message', handleMessage);
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('keydown', handleKeyDown);
-
+  fromObject(exampleData['diagData']);
+  /*
   nodes.value.push(
     {
       id: '1',
@@ -270,22 +274,26 @@ onMounted(() => {
   edges.value.push(
     {
       id: '1-2',
-      target: '2',
       source: '1',
+      sourceHandle: 'bottom',
+      target: '2',
+      targetHandle: 'top',
       updatable: true,
       type: 'custom',
-      data: { text: '1' },
+      data: { text: '1-2' },
     },
     {
       id: '1-3',
-      target: '3',
       source: '1',
+      sourceHandle: 'bottom',
+      target: '3',
+      targetHandle: 'top',
       updatable: true,
       type: 'custom',
-      data: { text: '2' },
+      data: { text: '1-3' },
     }
   );
-
+*/
 
 
 });
