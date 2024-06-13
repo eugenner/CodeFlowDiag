@@ -37,7 +37,7 @@ const {
 } = useVueFlow()
 
 let store = useVueFlow();
-let metaData = {nextId: 10, fileName: ''};
+let metaData = {nextId: 11, fileName: ''};
 let fileName = ref('cfd.json');
 let clickStack = [1, 2];
 const showSaveInfo = ref(false);
