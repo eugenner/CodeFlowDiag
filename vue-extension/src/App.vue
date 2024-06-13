@@ -8,6 +8,7 @@ import { faFloppyDisk, faQuestionCircle, faXmarkCircle } from '@fortawesome/free
 import { Background } from '@vue-flow/background'
 import markdownit from 'markdown-it'
 import { markRaw } from 'vue'
+
 import CustomNode from './components/CustomNode.vue'
 import CustomEdge from './components/CustomEdge.vue'
 
@@ -102,17 +103,15 @@ function onAddNode(nodeToClone) {
     addNodes({
       id: nId,
       type: 'custom',
-      class: 'custom_node vue-flow__node vue-flow__node-default nopan draggable selectable',
       position: { x: nodeToClone.position.x + 120, y: nodeToClone.position.y - 40 },
-      data: { text: nodeToClone.data.text, bgColor: nodeToClone.data.bgColor }
+      data: { shapeType: nodeToClone.data.shapeType, text: nodeToClone.data.text, bgColor: nodeToClone.data.bgColor }
     })
   } else {
     addNodes({
       id: nId,
       type: 'custom',
-      class: 'custom_node vue-flow__node vue-flow__node-default nopan draggable selectable',
       position: vueFlowInstance.project({ x: mousePosition.x, y: mousePosition.y }),
-      data: { text: '', bgColor: '' }
+      data: { shapeType: 'default', text: '', bgColor: '' }
     })
   }
 
@@ -213,25 +212,26 @@ const showInfo = () => {
 
 const helpText = `
 Help
-* Double-click to create a new node
+* Double-click to create a new node.
 * Click node's edit icon to:
-  * Edit
-    * MarkDown content syntax
-  * Resize
-  * Clone
-  * Src link
-    * Open source file, select lines, press right button and choose "Copy source path (code flow diag)" 
-    * After, click the "src link" button to connect the Node with the source file
-    * Src unlink - to delete connection between node and source
-  * Delete
-  * Change node's background color
-* Save data
-  * Click save icon
-  * Choose file name to save, path is relative to the current project
-* Load data
-  * CFD LIST panel
-    * Click the Refresh icon to update the file list
-    * Edit button to open saved Diagram
+  * Choose the shape.
+  * Edit:
+    * MarkDown content syntax.
+  * Resize.
+  * Clone.
+  * Src link:
+    * Open source file, select lines, press right button and choose "Copy source path (code flow diag)".
+    * After, click the "src link" button to connect the Node with the source file.
+    * Src unlink - to delete connection between node and source.
+  * Delete.
+  * Change the node's background color.
+* Save data:
+  * Click the save icon.
+  * Choose the file name to save; the path is relative to the current project.
+* Load data:
+  * CFD LIST panel:
+    * Click the Refresh icon to update the file list.
+    * Edit button to open the saved Diagram.
 `;
 
 onBeforeUnmount(() => {
@@ -245,28 +245,28 @@ onMounted(() => {
   window.addEventListener('mousemove', handleMouseMove);
   window.addEventListener('keydown', handleKeyDown);
   fromObject(exampleData['diagData']);
-  /*
+  /* 
   nodes.value.push(
     {
       id: '1',
       type: 'custom',
-      data: { text: 'one', bgColor: '#a1a4f7' },
+      data: { shapeType: 'default', text: 'one', bgColor: '#a1a4f7' },
       position: { x: 100, y: 100 },
-      class: 'vue-flow__node-default nopan draggable selectable'
+      class: 'nopan draggable selectable'
     },
     {
       id: '2',
       type: 'custom',
-      data: { text: 'two', bgColor: '#dfb3b3' },
+      data: { shapeType: 'default', text: 'two', bgColor: '#dfb3b3' },
       position: { x: 25, y: 200 },
-      class: 'vue-flow__node-default nopan draggable selectable'
+      class: 'nopan draggable selectable'
     },
     {
       id: '3',
       type: 'custom',
-      data: { text: 'three', bgColor: '#dfb3b3' },
+      data: { shapeType: 'ellipse', text: 'three', bgColor: '#dfb3b3' },
       position: { x: 200, y: 200 },
-      class: 'vue-flow__node-default nopan draggable selectable'
+      class: 'nopan draggable selectable'
     }
   );
 
@@ -313,6 +313,7 @@ onMounted(() => {
           @cloneNodeAction="cloneNodeAction(nodeProps.id)"
           @isEdit="nodeEditStateAction" />
       </template>
+
       <template #edge-custom="edgeProps">
         <CustomEdge v-bind="edgeProps" 
           @isEdgeEdit="edgeEditStateAction" />
@@ -373,6 +374,8 @@ body,
 .vue-flow__node-default {
   padding: 0;
   display: flex;
+  width: 100%;
+  height: 100%;
 }
 
 .vue-flow__background {
