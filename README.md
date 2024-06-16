@@ -1,10 +1,14 @@
 This extension gives the possibility to create diagrams within the VS Code project and link diagram nodes to specific lines of source code. Based on the Vue Flow component https://vueflow.dev/.
 
+---
+
 Nodes text with markdown syntax: https://markdown-it.github.io/
 
 BPMN icons: https://lineicons.com/free-icons/bpmn
 
-Installation:
+---
+
+**Building**:
 
   cd vue-extension
 
@@ -18,7 +22,8 @@ Installation:
 
   npm run build
 
+---
 
-Packaging:
+**Packaging**:
 
   vsce package
